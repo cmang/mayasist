@@ -1,0 +1,18 @@
+Speech recognition:
+
+PyAudio
+SpeechRecognition
+PocketSphinx
+openai-whisper
+soundfile
+
+
+portaudio:
+    brew install portaudio
+    apt install portaudio19-dev python-all-dev
+
+AI:
+openai
+
+
+
