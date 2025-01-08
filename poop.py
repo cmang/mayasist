@@ -18,17 +18,81 @@ def clean_text(text):
     text = ' '.join(tokenized).lower()
     return text
 
+def list_of_voice_names(voices):
+    names = []
+    for voice in voices:
+        names += voice.id
+    return names
+
+def audio_to_text(audio):
+    r = sr.Recognizer()
+    enabled_listen_engines = [
+                        #'google',
+                        #'sphinx',
+                        'whisper',
+                      ]
+    # Try Google Speech Recognition
+    if 'google' in enabled_listen_engines:
+        # recognize speech using Google Speech Recognition
+        try:  
+            # for testing purposes, we're just using the default API key 
+            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # instead of `r.recognize_google(audio)`
+            read_text = r.recognize_google(audio)
+            print("Google Speech API (online): " + read_text)
+        except sr.UnknownValueError:
+            pass
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            pass
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+    # Try Sphinx Speech Recognition (offline)
+    if 'sphinx' in enabled_listen_engines:
+        try:
+            read_text = r.recognize_sphinx(audio)
+            print(f"Sphinx API (offline): {read_text}")
+        except sr.UnknownValueError:
+            print("Sphinx could not understand audio")
+        except sr.RequestError as e:
+            print("Sphinx error; {0}".format(e))
+
+    # Try Whisper Speech Recognition (offline)
+    if 'whisper' in enabled_listen_engines:
+        try:
+            read_text = r.recognize_whisper(audio, language="english")
+            if read_text != '':
+                print(f"User: {read_text}")
+        except sr.UnknownValueError:
+            print("Whisper could not understand audio")
+        except sr.RequestError as e:
+            print("Whispher error; {0}".format(e))
+    return read_text
+
 def main():
     # init tts engine
     print("Initializing text to speech engine...")
     tts = pyttsx3.init()
+    tts.setProperty('rate', 175)     # setting up new voice rate
     rate = tts.getProperty('rate')   # getting details of current speaking rate
     print(rate)                        #printing current voice rate
-    tts.setProperty('rate', 140)     # setting up new voice rate
-    voices = tts.getProperty('rate')
-    print(f"Available voices: {voices}")
+    voices = tts.getProperty('voices')
+    number_of_voices = len(voices)
+    print(f"Available voices: {number_of_voices}")
+
+    i = 0
+    for voice in voices:
+        print(f"num: {i}, id: {voice.id}")
+        i += 1
+
+    #voice_names_list = list_of_voice_names(voices)
+    #print(f"Full list of voices: {voice_names_list}")
+    #tts.setProperty('voice', voices[179].id)
+    voice = tts.getProperty('voice')
+    print(f"Current voice: {voice}")
 
     # init sounds for beeps and boops
+    print("Initializing sound playback engine..")
     sound = sounds.SoundEngine()
 
     # obtain audio from the microphone
@@ -46,7 +110,7 @@ def main():
     # config
     # Phrase to trigger the assistant into action
     #context = "You are a helpful assistant, but also a bad dude with a rude tude. Do not hallucinate."
-    context = "You are helpful, wise, and chill. Cool, useful, brief. Not too enthusiastic. A bit edgy, a bit of an attitude. Do not hallucinate. Remember that you are a robot."
+    context = "You are helpful, wise, and chill. Cool, useful. Not too enthusiastic. A bit edgy, a bit of an attitude. Do not hallucinate."
     triggers = [
                 "hello computer",
                 "hey computer",
@@ -54,11 +118,6 @@ def main():
                 "okay computer",
                 ]
 
-    enabled_listen_engines = [
-                        #'google',
-                        #'sphinx',
-                        'whisper',
-                      ]
 
     # runtime state
     listening = True
@@ -71,56 +130,20 @@ def main():
     print('')
     print("Listening...")
     print('')
+    tts.say("I'm listening. Say Hey Computer to trigger me.")
+    tts.runAndWait()
 
     while listening:
         while not triggered:
             with sr.Microphone() as source:
-                r.pause_threshold = 1
+                #r.pause_threshold = 1
                 audio = r.listen(source)
                 #print("Done listening. Processing...")
 
 
-            read_text = ""
-
-            # Try Google Speech Recognition
-            if 'google' in enabled_listen_engines:
-                # recognize speech using Google Speech Recognition
-                try:  
-                    # for testing purposes, we're just using the default API key 
-                    # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-                    # instead of `r.recognize_google(audio)`
-                    read_text = r.recognize_google(audio)
-                    print("Google Speech API (online): " + read_text)
-                except sr.UnknownValueError:
-                    pass
-                    print("Google Speech Recognition could not understand audio")
-                except sr.RequestError as e:
-                    pass
-                    print("Could not request results from Google Speech Recognition service; {0}".format(e))
-
-            # Try Sphinx Speech Recognition (offline)
-            if 'sphinx' in enabled_listen_engines:
-                try:
-                    read_text = r.recognize_sphinx(audio)
-                    print(f"Sphinx API (offline): {read_text}")
-                except sr.UnknownValueError:
-                    print("Sphinx could not understand audio")
-                except sr.RequestError as e:
-                    print("Sphinx error; {0}".format(e))
-
-            # Try Whisper Speech Recognition (offline)
-            if 'whisper' in enabled_listen_engines:
-                try:
-                    read_text = r.recognize_whisper(audio, language="english")
-                    if read_text != '':
-                        print(f"User: {read_text}")
-                except sr.UnknownValueError:
-                    print("Whisper could not understand audio")
-                except sr.RequestError as e:
-                    print("Whispher error; {0}".format(e))
-
-
+            read_text = audio_to_text(audio)
             text = clean_text(read_text)
+
             #print(f"cleaned: {text}")
 
             if text in triggers:
@@ -138,17 +161,9 @@ def main():
 
             # Triggered, so listen for prompt.
             with sr.Microphone() as source:
-                r.pause_threshold = 1
+                #r.pause_threshold = 1
                 audio = r.listen(source)
-                if 'whisper' in enabled_listen_engines:
-                    try:
-                        read_text = r.recognize_whisper(audio, language="english")
-                        #print(f"Whisper API (offline): {read_text}")
-                        print(f"User: {read_text}")
-                    except sr.UnknownValueError:
-                        print("Whisper could not understand audio")
-                    except sr.RequestError as e:
-                        print("Whispher error; {0}".format(e))
+                read_text = audio_to_text(audio)
 
             prompt = read_text
             # Ask OpenAI to respond to the prompt 
@@ -182,10 +197,55 @@ def main():
             print('')  # blank line
             #message = input("User: ")
             message = prompt
-            if message.lower() == 'quit':
+            if clean_text(message) == 'quit':
                 listening = False
                 triggered = False
                 break
+            elif clean_text(message) == 'reset voice':
+                tts = pyttsx3.init()
+                tts.setProperty('rate', 175)     # setting up new voice rate
+                message = "Done. The voice has been reset."
+                tts.say(message)
+                tts.runAndWait()
+                message = None
+            elif clean_text(message) == 'set voice number' or \
+                    clean_text(message) == 'set voice':
+                message = "Which voice number do you want to set? Minimum is 0, Maximum is "
+                max_num = len(voices)
+                message += str(max_num)
+                tts.say(message)
+                tts.runAndWait()
+                # get number from user
+                sound.beep()
+                with sr.Microphone() as source:
+                    #r.pause_threshold = 1
+                    audio = r.listen(source)
+                user_response = clean_text(audio_to_text(audio))
+                if user_response == "zero":
+                    user_response = "0"
+                print(f"User: {user_response}")
+                if user_response.isdigit():
+                    # it's a number, see if it's valid
+                    num = int(user_response)
+                    if num >= 0 and num <= max_num:
+                        # Valid voice number. set it.
+                        tts.setProperty('voice', voices[num].id)
+                        message = f"Done! The voice has been set to voice {num}."
+                        tts.say(message)
+                        tts.runAndWait()
+                        message = None
+                    else:
+                        sound.boop()
+                        message = f"Sorry. {num} is not valid. The voice number must be between 0 and {max_num}."
+                        tts.say(message)
+                        tts.runAndWait()
+                        message = None
+                else:
+                    sound.boop()
+                    message = f"Sorry, I didn't understand. The voice number must be between 0 and {max_num}."
+                    tts.say(message)
+                    tts.runAndWait()
+                    message = None
             if message:
                 chat_completion = client.chat.completions.create(
                     messages=[
@@ -198,7 +258,8 @@ def main():
                             "content": message,
                         }
                     ],
-                    model="gpt-4o",
+                    #model="gpt-4o",
+                    model="gpt-4o-mini",
                 )
                 reply = chat_completion.choices[0].message.content
                 print(f"Chat GPT: {reply}")
