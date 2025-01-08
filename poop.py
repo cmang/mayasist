@@ -2,6 +2,7 @@
 
 import os
 import re
+import pyttsx3
 
 from openai import OpenAI
 import speech_recognition as sr
@@ -16,6 +17,15 @@ def clean_text(text):
     return text
 
 def main():
+    # init tts engine
+    print("Initializing text to speech engine...")
+    tts = pyttsx3.init()
+    rate = tts.getProperty('rate')   # getting details of current speaking rate
+    print(rate)                        #printing current voice rate
+    tts.setProperty('rate', 140)     # setting up new voice rate
+    voices = tts.getProperty('rate')
+    print(f"Available voices: {voices}")
+
     # obtain audio from the microphone
     r = sr.Recognizer()
 
@@ -31,7 +41,7 @@ def main():
     # config
     # Phrase to trigger the assistant into action
     #context = "You are a helpful assistant, but also a bad dude with a rude tude. Do not hallucinate."
-    context = "You are helpful, wise, and chill. Cool, useful, brief. Not too enthusiastic. Do not hallucinate. Remember that you are a robot."
+    context = "You are helpful, wise, and chill. Cool, useful, brief. Not too enthusiastic. A bit edgy, a bit of an attitude. Do not hallucinate. Remember that you are a robot."
     triggers = [
                 "hello computer",
                 "hey computer",
@@ -97,7 +107,8 @@ def main():
             if 'whisper' in enabled_listen_engines:
                 try:
                     read_text = r.recognize_whisper(audio, language="english")
-                    print(f"User: {read_text}")
+                    if read_text != '':
+                        print(f"User: {read_text}")
                 except sr.UnknownValueError:
                     print("Whisper could not understand audio")
                 except sr.RequestError as e:
@@ -185,6 +196,10 @@ def main():
                 reply = chat_completion.choices[0].message.content
                 print(f"Chat GPT: {reply}")
                 print('')  # blank line
+
+                # Speak chatGPT's reply out loud
+                tts.say(reply)
+                tts.runAndWait()
         triggered = False
         print("Going back to sleep...")
 

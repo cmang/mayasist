@@ -1,18 +1,15 @@
-Speech recognition:
-
+openai
 PyAudio
 SpeechRecognition
 PocketSphinx
 openai-whisper
 soundfile
+pyttsx3
 
+pyttsx3:
+    apt install espeak ffmpeg libespeak1
 
 portaudio:
     brew install portaudio
     apt install portaudio19-dev python-all-dev
-
-AI:
-openai
-
-
 
