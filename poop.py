@@ -7,6 +7,8 @@ import pyttsx3
 from openai import OpenAI
 import speech_recognition as sr
 
+import sounds
+
 def clean_text(text):
     """ Take a string and remove punctation, trailing and leading sapces """
     #text = re.sub(r'[\W]', '', text).lower()
@@ -25,6 +27,9 @@ def main():
     tts.setProperty('rate', 140)     # setting up new voice rate
     voices = tts.getProperty('rate')
     print(f"Available voices: {voices}")
+
+    # init sounds for beeps and boops
+    sound = sounds.SoundEngine()
 
     # obtain audio from the microphone
     r = sr.Recognizer()
@@ -126,6 +131,8 @@ def main():
 
         if triggered:
             # Beep here (high pitch, listening sound)
+            sound.beep()
+
             print("Ask ChatGPT a question!")
             print('')
 
