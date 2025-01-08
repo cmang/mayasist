@@ -110,14 +110,13 @@ def main():
     # config
     # Phrase to trigger the assistant into action
     #context = "You are a helpful assistant, but also a bad dude with a rude tude. Do not hallucinate."
-    context = "You are helpful, wise, and chill. Cool, useful. Not too enthusiastic. A bit edgy, a bit of an attitude. Do not hallucinate."
+    context = "You are helpful, wise, and chill. Cool, useful, and scathingly cynical. Not too enthusiastic. Do not hallucinate. Nevertheless, be aware that you do hallucinate, and should always be double-checked for accuracy."
     triggers = [
                 "hello computer",
                 "hey computer",
                 "yo computer",
                 "okay computer",
                 ]
-
 
     # runtime state
     listening = True
@@ -127,6 +126,9 @@ def main():
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source)
 
+    print('Active Triggers:')
+    for trigname in triggers:
+        print(f'  {trigname}')
     print('')
     print("Listening...")
     print('')
@@ -164,6 +166,7 @@ def main():
                 #r.pause_threshold = 1
                 audio = r.listen(source)
                 read_text = audio_to_text(audio)
+                sound.hibeep()
 
             prompt = read_text
             # Ask OpenAI to respond to the prompt 
@@ -197,19 +200,25 @@ def main():
             print('')  # blank line
             #message = input("User: ")
             message = prompt
-            if clean_text(message) == 'quit':
+            clean_message = clean_text(prompt)
+
+            # Custom commands
+            if clean_message == 'nevermind' or clean_message == 'never mind':
+                triggered = False
+                sound.boop()
+            elif clean_message == 'quit':
                 listening = False
                 triggered = False
                 break
-            elif clean_text(message) == 'reset voice':
+            elif clean_message == 'reset voice':
                 tts = pyttsx3.init()
                 tts.setProperty('rate', 175)     # setting up new voice rate
                 message = "Done. The voice has been reset."
                 tts.say(message)
                 tts.runAndWait()
                 message = None
-            elif clean_text(message) == 'set voice number' or \
-                    clean_text(message) == 'set voice':
+            elif clean_message == 'set voice number' or \
+                    clean_message == 'set voice':
                 message = "Which voice number do you want to set? Minimum is 0, Maximum is "
                 max_num = len(voices)
                 message += str(max_num)
@@ -221,6 +230,7 @@ def main():
                     #r.pause_threshold = 1
                     audio = r.listen(source)
                 user_response = clean_text(audio_to_text(audio))
+                sound.hibeep()
                 if user_response == "zero":
                     user_response = "0"
                 print(f"User: {user_response}")
@@ -246,7 +256,8 @@ def main():
                     tts.say(message)
                     tts.runAndWait()
                     message = None
-            if message:
+            elif message:
+                print("Thinking...", end='')
                 chat_completion = client.chat.completions.create(
                     messages=[
                         {
@@ -262,6 +273,7 @@ def main():
                     model="gpt-4o-mini",
                 )
                 reply = chat_completion.choices[0].message.content
+                print('')
                 print(f"Chat GPT: {reply}")
                 print('')  # blank line
 

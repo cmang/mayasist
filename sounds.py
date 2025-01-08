@@ -6,10 +6,14 @@ class SoundEngine():
         # Initialize PyAudio
         self.p = pyaudio.PyAudio()
         self.beep_filename = 'beep.wav'
+        self.hibeep_filename = 'hibeep.wav'
         self.boop_filename = 'boop.wav'
 
     def beep(self):
         self.play_sound(self.beep_filename)
+
+    def hibeep(self):
+        self.play_sound(self.hibeep_filename)
         
     def boop(self):
         self.play_sound(self.boop_filename)
