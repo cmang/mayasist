@@ -2,7 +2,13 @@ Mayasist
 
 An AI assistant. My assistant.
 
-It doesn't do that much yet. It uses offline local speech to text and text to speech. It listens for trigger phrases "hey computer" and "yo computer," understands "nevermind," can "quit," "list commands," and "set voice." All other requests go to chatGPT.
+It doesn't do that much yet.
+
+- Offline local speech to text and text to speech.
+- Listens for trigger phrases "hey computer," "hello computer," "yo computer" and "hey stupid computer." (to be customizable)
+- Understands "nevermind" "quit" "exit" "help" "list commands"
+- "set voice" and "list voices" to change the voice on the fly
+- All other requests go to chatGPT.
 
 Needs these things:
 
