@@ -5,8 +5,17 @@ An AI assistant. My assistant.
 It doesn't do that much yet.
 
 - Offline local speech to text and text to speech.
-- Listens for trigger phrases "hey computer," "hello computer," "yo computer" and "hey stupid computer." (to be customizable)
-- Understands "nevermind" "quit" "exit" "help" "list commands"
+- Listens for trigger phrases (to be customizable):
+  - "hey computer"
+  - "hello computer"
+  - "yo computer"
+  - "hey stupid computer"
+- Other commands:
+  - "nevermind"
+  -  "quit"
+  -  "exit"
+  -  "help"
+  -  "list commands"
 - "set voice" and "list voices" to change the voice on the fly
 - All other requests go to chatGPT.
 
