@@ -7,7 +7,8 @@ import pyttsx3
 from openai import OpenAI
 import speech_recognition as sr
 
-import sounds
+import src.sounds as sounds
+import src.lights as lights
 
 def clean_text(text):
     """ Take a string and remove punctation, trailing and leading sapces """
@@ -114,15 +115,18 @@ def main():
     triggers = [
                 "hello computer",
                 "hey computer",
+                "a computer",   # stupid fuzzy match for "hey computer"
                 "yo computer",
                 "okay computer",
+                "hey stupid computer",
+                "yo tupid computer",
                 ]
 
     # runtime state
     listening = True
     triggered = False
 
-    command_list = ['help', 'set voice', 'nevermind', 'quit']
+    command_list = ['help', 'set voice', 'list voices', 'nevermind', 'quit']
 
     print("Adjusting for ambient noise...")
     with sr.Microphone() as source:
@@ -159,15 +163,15 @@ def main():
 
         if triggered:
             # Beep here (high pitch, listening sound)
-            sound.beep()
 
             print("Ask ChatGPT a question!")
             print('')
 
             # Triggered, so listen for prompt.
             with sr.Microphone() as source:
-                #r.pause_threshold = 1
+                # wait a little longer for this one. Thoughts may be rambling.
                 r.pause_threshold = 2
+                sound.beep()
                 audio = r.listen(source)
                 read_text = audio_to_text(audio)
                 sound.hibeep()
@@ -215,16 +219,20 @@ def main():
                 tts.runAndWait()
                 for command in command_list:
                     if command == command_list[-1]:
-                        print(f"and {command}.")
+                        print(f"{command}")
                         tts.say(f"and {command}.")
                     else:
                         print(command)
                         tts.say(command)
                     tts.runAndWait()
+                print('')
                 triggered = False
-            elif clean_message == 'quit':
+            elif clean_message == 'quit' or\
+                    clean_message == 'exit':
                 listening = False
                 triggered = False
+                tts.say("Shutting down.")
+                tts.runAndWait()
                 break
             #elif clean_message == 'reset voice':
             #    tts = pyttsx3.init()
@@ -232,18 +240,33 @@ def main():
             #    message = "Done. The voice has been reset."
             #    tts.say(message)
             #    tts.runAndWait()
-            #    message = None
-            elif clean_message == 'set voice number' or \
-                    clean_message == 'set voice':
+            #    message = Nona
+            elif 'list voices' in clean_message or \
+                    'list the voices' in clean_message or \
+                    'list of the voices' in clean_message or \
+                    'list of all the voices' in clean_message:
+                tts.say("Printing voice list to console.")
+                tts.runAndWait()
+                if len(voices) > 10:
+                    tts.say("It may be long.")
+                    tts.runAndWait()
+                i = 0
+                for voice in voices:
+                    print(f"num: {i}, id: {voice.id}")
+                    i += 1
+            elif \
+                    clean_message.startswith('set voice') or \
+                    clean_message.startswith('change voice') or \
+                    clean_message == 'said voice':
                 message = "Which voice number do you want to set? Minimum is 0, Maximum is "
                 max_num = len(voices)
                 message += str(max_num)
                 tts.say(message)
                 tts.runAndWait()
                 # get number from user
-                sound.beep()
                 with sr.Microphone() as source:
-                    r.pause_threshold = 3
+                    r.pause_threshold = 1
+                    sound.beep()
                     audio = r.listen(source)
                 user_response = clean_text(audio_to_text(audio))
                 sound.hibeep()
@@ -315,5 +338,5 @@ def main():
     #    print(f"ChatGPT: {reply}")
     #    messages.append({"role": "assistant", "content": reply})
 
-
-main()
+if __name__ == "__main__":
+    main()

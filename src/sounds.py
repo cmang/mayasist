@@ -42,3 +42,9 @@ class SoundEngine():
 
         
         #self.p.terminate()
+
+def list_of_voice_names(voices):
+    names = []
+    for voice in voices:                                                                                    names += voice.id
+    return names
+
