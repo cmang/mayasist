@@ -122,6 +122,8 @@ def main():
     listening = True
     triggered = False
 
+    command_list = ['help', 'set voice', 'nevermind', 'quit']
+
     print("Adjusting for ambient noise...")
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source)
@@ -138,7 +140,7 @@ def main():
     while listening:
         while not triggered:
             with sr.Microphone() as source:
-                #r.pause_threshold = 1
+                r.pause_threshold = 1
                 audio = r.listen(source)
                 #print("Done listening. Processing...")
 
@@ -164,6 +166,7 @@ def main():
             # Triggered, so listen for prompt.
             with sr.Microphone() as source:
                 #r.pause_threshold = 1
+                r.pause_threshold = 3
                 audio = r.listen(source)
                 read_text = audio_to_text(audio)
                 sound.hibeep()
@@ -206,17 +209,29 @@ def main():
             if clean_message == 'nevermind' or clean_message == 'never mind':
                 triggered = False
                 sound.boop()
+            elif clean_message == 'help' or clean_message == 'list commands':
+                tts.say("The following commands are available.")
+                tts.runAndWait()
+                for command in command_list:
+                    if command == command_list[-1]:
+                        print(f"and {command}.")
+                        tts.say(f"and {command}.")
+                    else:
+                        print(command)
+                        tts.say(command)
+                    tts.runAndWait()
+                triggered = False
             elif clean_message == 'quit':
                 listening = False
                 triggered = False
                 break
-            elif clean_message == 'reset voice':
-                tts = pyttsx3.init()
-                tts.setProperty('rate', 175)     # setting up new voice rate
-                message = "Done. The voice has been reset."
-                tts.say(message)
-                tts.runAndWait()
-                message = None
+            #elif clean_message == 'reset voice':
+            #    tts = pyttsx3.init()
+            #    tts.setProperty('rate', 175)     # setting up new voice rate
+            #    message = "Done. The voice has been reset."
+            #    tts.say(message)
+            #    tts.runAndWait()
+            #    message = None
             elif clean_message == 'set voice number' or \
                     clean_message == 'set voice':
                 message = "Which voice number do you want to set? Minimum is 0, Maximum is "
@@ -227,7 +242,7 @@ def main():
                 # get number from user
                 sound.beep()
                 with sr.Microphone() as source:
-                    #r.pause_threshold = 1
+                    r.pause_threshold = 3
                     audio = r.listen(source)
                 user_response = clean_text(audio_to_text(audio))
                 sound.hibeep()
