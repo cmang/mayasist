@@ -150,7 +150,8 @@ def main():
 
             #print(f"cleaned: {text}")
 
-            if text in triggers:
+            #if text in triggers:
+            if any(trig in text for trig in triggers):
                 print('')
                 print("Triggered!!!")
                 print('')
@@ -166,7 +167,7 @@ def main():
             # Triggered, so listen for prompt.
             with sr.Microphone() as source:
                 #r.pause_threshold = 1
-                r.pause_threshold = 3
+                r.pause_threshold = 2
                 audio = r.listen(source)
                 read_text = audio_to_text(audio)
                 sound.hibeep()
@@ -206,7 +207,7 @@ def main():
             clean_message = clean_text(prompt)
 
             # Custom commands
-            if clean_message == 'nevermind' or clean_message == 'never mind':
+            if 'nevermind' in clean_message or 'never mind' in clean_message:
                 triggered = False
                 sound.boop()
             elif clean_message == 'help' or clean_message == 'list commands':
