@@ -88,12 +88,6 @@ def main():
     # Init lights "engine"
     light = lights.LightsX10()
 
-    #voice_names_list = list_of_voice_names(voices)
-    #print(f"Full list of voices: {voice_names_list}")
-    #tts.setProperty('voice', voices[179].id)
-    voice = tts.getProperty('voice')
-    print(f"Current voice: {voice}")
-
     # init sounds for beeps and boops
     print("Initializing sound playback engine..")
     sound = sounds.SoundEngine()
@@ -105,10 +99,6 @@ def main():
     sources = sr.Microphone.list_microphone_names()
      
     print(sources)
-
-    #with sr.Microphone() as source:
-    #    print(f"Microphone: {dir(source)}")                                      #    print("Say something!")
-    #    audio = r.listen(source)
 
     # config
     # Phrase to trigger the assistant into action
