@@ -80,11 +80,13 @@ def main():
     voices = tts.getProperty('voices')
     number_of_voices = len(voices)
     print(f"Available voices: {number_of_voices}")
-
     i = 0
     for voice in voices:
         print(f"num: {i}, id: {voice.id}")
         i += 1
+
+    # Init lights "engine"
+    light = lights.LightsX10()
 
     #voice_names_list = list_of_voice_names(voices)
     #print(f"Full list of voices: {voice_names_list}")
@@ -126,7 +128,7 @@ def main():
     listening = True
     triggered = False
 
-    command_list = ['help', 'set voice', 'list voices', 'nevermind', 'quit']
+    command_list = ['help', 'set voice', 'list voices', 'lights on', 'lights off', 'say', 'nevermind', 'quit']
 
     print("Adjusting for ambient noise...")
     with sr.Microphone() as source:
@@ -227,13 +229,29 @@ def main():
                     tts.runAndWait()
                 print('')
                 triggered = False
-            elif clean_message == 'quit' or\
+            elif clean_message == 'quit' or \
                     clean_message == 'exit':
                 listening = False
                 triggered = False
                 tts.say("Shutting down.")
                 tts.runAndWait()
                 break
+            elif clean_message.startswith("say") or \
+                    clean_message.startswith("repeat after me"):
+                clean_message = clean_message.lstrip("say")
+                clean_message = clean_message.lstrip("repeat after me")
+                tts.say(clean_message)
+                tts.runAndWait()
+            elif "lights on" in clean_message or \
+                    "turn on the light" in clean_message:
+                tts.say("Turning on the lights.")
+                tts.runAndWait()
+                light.on()
+            elif "lights off" in clean_message or \
+                    "turn off the light" in clean_message:
+                tts.say("Turning off the lights.")
+                tts.runAndWait()
+                light.off()
             #elif clean_message == 'reset voice':
             #    tts = pyttsx3.init()
             #    tts.setProperty('rate', 175)     # setting up new voice rate
@@ -272,6 +290,12 @@ def main():
                 sound.hibeep()
                 if user_response == "zero":
                     user_response = "0"
+                if user_response == "for":
+                    user_response = "4"
+                if user_response == "sex":
+                    user_response = "6"
+                if user_response == "ate":
+                    user_response = "8"
                 print(f"User: {user_response}")
                 if user_response.isdigit():
                     # it's a number, see if it's valid
