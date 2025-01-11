@@ -72,7 +72,7 @@ def main():
                 "yo computer",
                 "okay computer",
                 "hey stupid computer",
-                "yo tupid computer",
+                "yo stupid computer",
                 ]
 
     # runtime state
