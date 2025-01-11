@@ -10,6 +10,7 @@ from openai import OpenAI
 import src.sounds as sounds
 import src.lights as lights
 import src.speech as speech
+import src.appstate as appstate
 
 def clean_text(text):
     """ Take a string and remove punctation, trailing and leading sapces """
@@ -27,6 +28,8 @@ def list_of_voice_names(voices):
     return names
 
 def main():
+    # Load App state
+    app = appstate.AppState()
     # Init speech recognition
     print("Initializing speech recognition engine...")
     #r = sr.Recognizer()
@@ -76,7 +79,17 @@ def main():
     listening = True
     triggered = False
 
-    command_list = ['help', 'set voice', 'list voices', 'lights on', 'lights off', 'say', 'nevermind', 'exit']
+    command_list = [
+            'help',
+            'list voices',
+            'set voice',
+            'current voice',
+            'lights on',
+            'lights off',
+            'say',
+            'nevermind',
+            'exit'
+            ]
 
     print("Adjusting for ambient noise...")
     stt.set_ambient_levels()
@@ -175,9 +188,11 @@ def main():
                         tts.say(command)
                     tts.runAndWait()
                 print('')
+                print("Anything that is not a command goes to Chat GPT.")
                 triggered = False
             elif clean_message == 'quit' or \
-                    clean_message == 'exit':
+                    clean_message == 'exit' or\
+                    clean_message == 'shut down':
                 listening = False
                 triggered = False
                 tts.say("Shutting down.")
@@ -206,6 +221,16 @@ def main():
             #    tts.say(message)
             #    tts.runAndWait()
             #    message = Nona
+            elif 'current voice' in clean_message or \
+                    'show voice' in clean_message:
+                voice_num = app.voice_num
+                if voice_num == None:
+                    print(f"Current voice: Default")
+                    tts.say(f"Current voice: Default")
+                else:
+                    print(f"Current voice: {voice_num} or {voices[voice_num].id}")
+                    tts.say(f"Current voice: {voice_num} or {voices[voice_num].id}")
+                tts.runAndWait()
             elif 'list voices' in clean_message or \
                     'list the voices' in clean_message or \
                     'list of the voices' in clean_message or \
@@ -251,6 +276,7 @@ def main():
                     if num >= 0 and num <= max_num:
                         # Valid voice number. set it.
                         tts.setProperty('voice', voices[num].id)
+                        app.voice_num = num
                         message = f"Done! The voice has been set to voice {num}."
                         tts.say(message)
                         tts.runAndWait()
