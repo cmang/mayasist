@@ -232,7 +232,7 @@ def main():
                 # get number from user
                 sound.beep()
                 audio = stt.listen()
-                user_response = clean_text(audio_to_text(audio))
+                user_response = clean_text(stt.audio_to_text(audio))
                 sound.hibeep()
 
                 if user_response == "zero":
