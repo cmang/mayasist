@@ -10,9 +10,10 @@ class Recognizer:
                 'google', \
                 'sphinx', \
                 'whisper', \
+                'faster-whisper', \
                 ]
 
-        self.default_engine = 'whisper'
+        self.default_engine = 'faster-whisper'
         self.engine = self.default_engine
 
     def set_ambient_levels(self):
@@ -55,8 +56,8 @@ class Recognizer:
             except sr.RequestError as e:
                 print("Sphinx error; {0}".format(e))
 
-        # Try Whisper Speech Recognition (offline)
-        if self.engine == 'whisper':
+        # Try Faster Whisper Speech Recognition (offline)
+        if self.engine == 'faster-whisper':
             try:
                 read_text = self.r.recognize_whisper(audio, language="english")
                 if read_text != '':
@@ -65,4 +66,16 @@ class Recognizer:
                 print("Whisper could not understand audio")
             except sr.RequestError as e:
                 print("Whispher error; {0}".format(e))
+
+        # Try Whisper Speech Recognition (offline)
+        if self.engine == 'whisper':
+            try:
+                read_text = self.r.recognize_faster_whisper(audio, language="english")
+                if read_text != '':
+                    print(f"User: {read_text}")
+            except sr.UnknownValueError:
+                print("Whisper could not understand audio")
+            except sr.RequestError as e:
+                print("Whispher error; {0}".format(e))
+
         return read_text    
