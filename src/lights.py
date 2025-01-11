@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Turn the lights off and on
 #
 # Makes a call to an X10 Pyro server connected to an X10 Firecracker (rs-232):
@@ -24,6 +25,7 @@ class LightsX10():
         url = self.url + 'ON'
         print(f"Calling url: {url}")
         #r = requests.post(url)
+        r = None
         try:
             with urllib.request.urlopen(url) as response:
                    r = response.read()
@@ -44,3 +46,17 @@ class LightsX10():
             print(f"There was an error opening the URL: {E}")
         print(f"X10 Pyro Results: {r}")
         return True
+
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) < 2:
+        print(f"Usage: {sys.argv[0]} on")
+        print(f"       {sys.argv[0]} off")
+        sys.exit(1)
+    light = LightsX10()
+    if sys.argv[1].lower() == 'on':
+        light.on()
+    elif sys.argv[1].lower() == 'off':
+        light.off()
+
+
