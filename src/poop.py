@@ -5,10 +5,11 @@ import re
 import pyttsx3
 
 from openai import OpenAI
-import speech_recognition as sr
+#import speech_recognition as sr
 
 import src.sounds as sounds
 import src.lights as lights
+import src.speech as speech
 
 def clean_text(text):
     """ Take a string and remove punctation, trailing and leading sapces """
@@ -25,52 +26,16 @@ def list_of_voice_names(voices):
         names += voice.id
     return names
 
-def audio_to_text(audio):
-    r = sr.Recognizer()
-    enabled_listen_engines = [
-                        #'google',
-                        #'sphinx',
-                        'whisper',
-                      ]
-    # Try Google Speech Recognition
-    if 'google' in enabled_listen_engines:
-        # recognize speech using Google Speech Recognition
-        try:  
-            # for testing purposes, we're just using the default API key 
-            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
-            # instead of `r.recognize_google(audio)`
-            read_text = r.recognize_google(audio)
-            print("Google Speech API (online): " + read_text)
-        except sr.UnknownValueError:
-            pass
-            print("Google Speech Recognition could not understand audio")
-        except sr.RequestError as e:
-            pass
-            print("Could not request results from Google Speech Recognition service; {0}".format(e))
-
-    # Try Sphinx Speech Recognition (offline)
-    if 'sphinx' in enabled_listen_engines:
-        try:
-            read_text = r.recognize_sphinx(audio)
-            print(f"Sphinx API (offline): {read_text}")
-        except sr.UnknownValueError:
-            print("Sphinx could not understand audio")
-        except sr.RequestError as e:
-            print("Sphinx error; {0}".format(e))
-
-    # Try Whisper Speech Recognition (offline)
-    if 'whisper' in enabled_listen_engines:
-        try:
-            read_text = r.recognize_whisper(audio, language="english")
-            if read_text != '':
-                print(f"User: {read_text}")
-        except sr.UnknownValueError:
-            print("Whisper could not understand audio")
-        except sr.RequestError as e:
-            print("Whispher error; {0}".format(e))
-    return read_text
-
 def main():
+    # Init speech recognition
+    print("Initializing speech recognition engine...")
+    #r = sr.Recognizer()
+    stt = speech.Recognizer()
+
+    print("Audio sources:")
+    sources = stt.list_audio_sources()
+    print(sources)
+
     # init tts engine
     print("Initializing text to speech engine...")
     tts = pyttsx3.init()
@@ -92,13 +57,6 @@ def main():
     print("Initializing sound playback engine..")
     sound = sounds.SoundEngine()
 
-    # obtain audio from the microphone
-    r = sr.Recognizer()
-
-    print("Audio sources:")
-    sources = sr.Microphone.list_microphone_names()
-     
-    print(sources)
 
     # config
     # Phrase to trigger the assistant into action
@@ -118,11 +76,10 @@ def main():
     listening = True
     triggered = False
 
-    command_list = ['help', 'set voice', 'list voices', 'lights on', 'lights off', 'say', 'nevermind', 'quit']
+    command_list = ['help', 'set voice', 'list voices', 'lights on', 'lights off', 'say', 'nevermind', 'exit']
 
     print("Adjusting for ambient noise...")
-    with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source)
+    stt.set_ambient_levels()
 
     print('Active Triggers:')
     for trigname in triggers:
@@ -135,13 +92,12 @@ def main():
 
     while listening:
         while not triggered:
-            with sr.Microphone() as source:
-                r.pause_threshold = 1
-                audio = r.listen(source)
-                #print("Done listening. Processing...")
+            # Listen for trigger word
+            print("listening..")
+            audio = stt.listen()
+            print("listened..")
 
-
-            read_text = audio_to_text(audio)
+            read_text = stt.audio_to_text(audio)
             text = clean_text(read_text)
 
             #print(f"cleaned: {text}")
@@ -154,21 +110,22 @@ def main():
                 triggered = True
 
         if triggered:
-            # Beep here (high pitch, listening sound)
-
-            print("Ask ChatGPT a question!")
-            print('')
-
             # Triggered, so listen for prompt.
-            with sr.Microphone() as source:
-                # wait a little longer for this one. Thoughts may be rambling.
-                r.pause_threshold = 2
-                sound.beep()
-                audio = r.listen(source)
-                read_text = audio_to_text(audio)
-                sound.hibeep()
+
+            print("Give me a command or ssk ChatGPT a question.")
+            print('')
+            sound.beep()
+
+            # wait a little longer (2) for this one. Thoughts may be rambling.
+            audio = stt.listen(threshold = 2)
+
+            read_text = stt.audio_to_text(audio)
+            sound.hibeep()
 
             prompt = read_text
+
+
+
             # Ask OpenAI to respond to the prompt 
 
             #client = OpenAI(
@@ -271,13 +228,13 @@ def main():
                 message += str(max_num)
                 tts.say(message)
                 tts.runAndWait()
+
                 # get number from user
-                with sr.Microphone() as source:
-                    r.pause_threshold = 1
-                    sound.beep()
-                    audio = r.listen(source)
+                sound.beep()
+                audio = stt.listen()
                 user_response = clean_text(audio_to_text(audio))
                 sound.hibeep()
+
                 if user_response == "zero":
                     user_response = "0"
                 if user_response == "for":
