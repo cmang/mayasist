@@ -60,8 +60,8 @@ def main():
 
     # config
     # Phrase to trigger the assistant into action
-    #context = "You are a helpful assistant, but also a bad dude with a rude tude. Do not hallucinate."
-    context = "You are helpful, wise, and chill. Cool, useful, and scathingly cynical. Not too enthusiastic. Do not hallucinate. Nevertheless, be aware that you do hallucinate, and should always be double-checked for accuracy."
+    context = "You are a helpful assistant, but also a bad dude with a rude tude. Cynical. Do not hallucinate."
+    #context = "You are helpful, wise, and chill. Cool, useful, and scathingly cynical. Not too enthusiastic. Do not hallucinate. Nevertheless, be aware that you do hallucinate, and should always be double-checked for accuracy."
     triggers = [
                 "hello computer",
                 "hey computer",
@@ -93,9 +93,9 @@ def main():
     while listening:
         while not triggered:
             # Listen for trigger word
-            print("listening..")
+            #print("listening..")
             audio = stt.listen()
-            print("listened..")
+            #print("listened..")
 
             read_text = stt.audio_to_text(audio)
             text = clean_text(read_text)
@@ -222,7 +222,8 @@ def main():
             elif \
                     clean_message.startswith('set voice') or \
                     clean_message.startswith('change voice') or \
-                    clean_message == 'said voice':
+                    clean_message == 'said voice' or \
+                    clean_message == 'sad voice':
                 message = "Which voice number do you want to set? Minimum is 0, Maximum is "
                 max_num = len(voices)
                 message += str(max_num)
