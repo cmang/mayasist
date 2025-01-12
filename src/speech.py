@@ -14,6 +14,7 @@ class Recognizer:
                 ]
 
         self.default_engine = 'faster-whisper'
+        #self.default_engine = 'sphinx'
         self.engine = self.default_engine
 
     def set_ambient_levels(self):
@@ -59,7 +60,7 @@ class Recognizer:
         # Try Faster Whisper Speech Recognition (offline)
         if self.engine == 'faster-whisper':
             try:
-                read_text = self.r.recognize_whisper(audio, language="english")
+                read_text = self.r.recognize_whisper(audio, language="english", model="tiny")
                 if read_text != '':
                     print(f"User: {read_text}")
             except sr.UnknownValueError:
