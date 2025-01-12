@@ -25,7 +25,9 @@ class MayaTTS():
     def getVoiceName(self):
         return self.voices[self.set_voice_num].id
 
-    def say(self, text):
+    def say(self, text, printing=True):
+        if printing:
+            print(text)
         self.tts.say(text)
         # this SHOULD pause.. does in macos, doesn't in Linux?
         # Instead it seems to run in the backround.

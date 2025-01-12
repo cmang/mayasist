@@ -171,12 +171,12 @@ def main():
                 for command in command_list:
                     if command == command_list[-1]:
                         print(f"{command}")
-                        tts.say(f"and {command}.")
+                        tts.say(f"and {command}.", printing=False)
                     else:
                         print(command)
-                        tts.say(command)
+                        tts.say(command, printing=False)
                 print('')
-                print("Anything that is not a command goes to Chat GPT.")
+                tts.say("Anything that is not a command goes to Chat GPT.")
                 triggered = False
             elif clean_message == 'quit' or \
                     clean_message == 'exit' or\
@@ -202,10 +202,10 @@ def main():
                     'show voice' in clean_message:
                 voice_num = app.voice_num
                 if voice_num == None:
-                    print(f"Current voice: Default")
+                    #print(f"Current voice: Default")
                     tts.say(f"Current voice: Default")
                 else:
-                    print(f"Current voice: {voice_num} or {tts.voices[voice_num].id}")
+                    #print(f"Current voice: {voice_num} or {tts.voices[voice_num].id}")
                     tts.say(f"Current voice: {voice_num} or {tts.voices[voice_num].id}")
             elif 'list voices' in clean_message or \
                     'list the voices' in clean_message or \
@@ -252,19 +252,16 @@ def main():
                         tts.setVoiceNum(num)
                         app.voice_num = num
                         message = f"Done! The voice has been set to voice {num} or {tts.getVoiceName()}."
-                        print(message)
                         tts.say(message)
                         message = None
                     else:
                         sound.boop()
                         message = f"Sorry. {num} is not valid. The voice number must be between 0 and {max_num}."
-                        print(message)
                         tts.say(message)
                         message = None
                 else:
                     sound.boop()
                     message = f"Sorry, I didn't understand. The voice number must be between 0 and {max_num}."
-                    print(message)
                     tts.say(message)
                     message = None
             elif message:
@@ -285,7 +282,7 @@ def main():
                 )
                 reply = chat_completion.choices[0].message.content
                 print('')
-                print(f"Chat GPT: {reply}")
+                print(f"Chat GPT: ", end='')
                 print('')  # blank line
 
                 # Speak chatGPT's reply out loud
