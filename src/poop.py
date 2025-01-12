@@ -11,6 +11,7 @@ import src.sounds as sounds
 import src.lights as lights
 import src.speech as speech
 import src.appstate as appstate
+import src.tts as ttslib
 
 def clean_text(text):
     """ Take a string and remove punctation, trailing and leading sapces """
@@ -41,17 +42,7 @@ def main():
 
     # init tts engine
     print("Initializing text to speech engine...")
-    tts = pyttsx3.init()
-    tts.setProperty('rate', 175)     # setting up new voice rate
-    rate = tts.getProperty('rate')   # getting details of current speaking rate
-    print(rate)                        #printing current voice rate
-    voices = tts.getProperty('voices')
-    number_of_voices = len(voices)
-    print(f"Available voices: {number_of_voices}")
-    i = 0
-    for voice in voices:
-        print(f"num: {i}, id: {voice.id}")
-        i += 1
+    tts = ttslib.MayaTTS()
 
     # Init lights "engine"
     light = lights.LightsX10()
@@ -101,7 +92,6 @@ def main():
     print("Listening...")
     print('')
     tts.say("I'm listening. Say Hey Computer to trigger me.")
-    tts.runAndWait()
 
     while listening:
         while not triggered:
@@ -178,7 +168,6 @@ def main():
                 sound.boop()
             elif clean_message == 'help' or clean_message == 'list commands':
                 tts.say("The following commands are available.")
-                tts.runAndWait()
                 for command in command_list:
                     if command == command_list[-1]:
                         print(f"{command}")
@@ -186,7 +175,6 @@ def main():
                     else:
                         print(command)
                         tts.say(command)
-                    tts.runAndWait()
                 print('')
                 print("Anything that is not a command goes to Chat GPT.")
                 triggered = False
@@ -196,31 +184,20 @@ def main():
                 listening = False
                 triggered = False
                 tts.say("Shutting down.")
-                tts.runAndWait()
                 break
             elif clean_message.startswith("say") or \
                     clean_message.startswith("repeat after me"):
                 clean_message = clean_message.lstrip("say")
                 clean_message = clean_message.lstrip("repeat after me")
                 tts.say(clean_message)
-                tts.runAndWait()
             elif "lights on" in clean_message or \
                     "turn on the light" in clean_message:
                 tts.say("Turning on the lights.")
-                tts.runAndWait()
                 light.on()
             elif "lights off" in clean_message or \
                     "turn off the light" in clean_message:
                 tts.say("Turning off the lights.")
-                tts.runAndWait()
                 light.off()
-            #elif clean_message == 'reset voice':
-            #    tts = pyttsx3.init()
-            #    tts.setProperty('rate', 175)     # setting up new voice rate
-            #    message = "Done. The voice has been reset."
-            #    tts.say(message)
-            #    tts.runAndWait()
-            #    message = Nona
             elif 'current voice' in clean_message or \
                     'show voice' in clean_message:
                 voice_num = app.voice_num
@@ -230,16 +207,13 @@ def main():
                 else:
                     print(f"Current voice: {voice_num} or {voices[voice_num].id}")
                     tts.say(f"Current voice: {voice_num} or {voices[voice_num].id}")
-                tts.runAndWait()
             elif 'list voices' in clean_message or \
                     'list the voices' in clean_message or \
                     'list of the voices' in clean_message or \
                     'list of all the voices' in clean_message:
                 tts.say("Printing voice list to console.")
-                tts.runAndWait()
                 if len(voices) > 10:
                     tts.say("It may be long.")
-                    tts.runAndWait()
                 i = 0
                 for voice in voices:
                     print(f"num: {i}, id: {voice.id}")
@@ -253,7 +227,6 @@ def main():
                 max_num = len(voices)
                 message += str(max_num)
                 tts.say(message)
-                tts.runAndWait()
 
                 # get number from user
                 sound.beep()
@@ -279,19 +252,16 @@ def main():
                         app.voice_num = num
                         message = f"Done! The voice has been set to voice {num}."
                         tts.say(message)
-                        tts.runAndWait()
                         message = None
                     else:
                         sound.boop()
                         message = f"Sorry. {num} is not valid. The voice number must be between 0 and {max_num}."
                         tts.say(message)
-                        tts.runAndWait()
                         message = None
                 else:
                     sound.boop()
                     message = f"Sorry, I didn't understand. The voice number must be between 0 and {max_num}."
                     tts.say(message)
-                    tts.runAndWait()
                     message = None
             elif message:
                 print("Thinking...", end='')
@@ -316,7 +286,6 @@ def main():
 
                 # Speak chatGPT's reply out loud
                 tts.say(reply)
-                tts.runAndWait()
         triggered = False
         print("Going back to sleep...")
 
