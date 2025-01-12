@@ -205,17 +205,17 @@ def main():
                     print(f"Current voice: Default")
                     tts.say(f"Current voice: Default")
                 else:
-                    print(f"Current voice: {voice_num} or {voices[voice_num].id}")
-                    tts.say(f"Current voice: {voice_num} or {voices[voice_num].id}")
+                    print(f"Current voice: {voice_num} or {tts.voices[voice_num].id}")
+                    tts.say(f"Current voice: {voice_num} or {tts.voices[voice_num].id}")
             elif 'list voices' in clean_message or \
                     'list the voices' in clean_message or \
                     'list of the voices' in clean_message or \
                     'list of all the voices' in clean_message:
                 tts.say("Printing voice list to console.")
-                if len(voices) > 10:
+                if len(tts.voices) > 10:
                     tts.say("It may be long.")
                 i = 0
-                for voice in voices:
+                for voice in tts.voices:
                     print(f"num: {i}, id: {voice.id}")
                     i += 1
             elif \
@@ -223,9 +223,10 @@ def main():
                     clean_message.startswith('change voice') or \
                     clean_message == 'said voice' or \
                     clean_message == 'sad voice':
-                message = "Which voice number do you want to set? Minimum is 0, Maximum is "
-                max_num = len(voices)
-                message += str(max_num)
+                #message = "Which voice number do you want to set? Minimum is 0, Maximum is "
+                max_num = len(tts.voices)
+                #message += str(max_num)
+                message = "Which voice number do you want to set?"
                 tts.say(message)
 
                 # get number from user
@@ -248,19 +249,22 @@ def main():
                     num = int(user_response)
                     if num >= 0 and num <= max_num:
                         # Valid voice number. set it.
-                        tts.setProperty('voice', voices[num].id)
+                        tts.setVoiceNum(num)
                         app.voice_num = num
-                        message = f"Done! The voice has been set to voice {num}."
+                        message = f"Done! The voice has been set to voice {num} or {tts.getVoiceName()}."
+                        print(message)
                         tts.say(message)
                         message = None
                     else:
                         sound.boop()
                         message = f"Sorry. {num} is not valid. The voice number must be between 0 and {max_num}."
+                        print(message)
                         tts.say(message)
                         message = None
                 else:
                     sound.boop()
                     message = f"Sorry, I didn't understand. The voice number must be between 0 and {max_num}."
+                    print(message)
                     tts.say(message)
                     message = None
             elif message:
