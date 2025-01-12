@@ -49,7 +49,7 @@ class Recognizer:
         # Try Sphinx Speech Recognition (offline)
         if self.engine == 'sphinx':
             try:
-                read_text = r.recognize_sphinx(audio)
+                read_text = self.r.recognize_sphinx(audio)
                 print(f"Sphinx API (offline): {read_text}")
             except sr.UnknownValueError:
                 print("Sphinx could not understand audio")
